@@ -5,10 +5,6 @@
   (:require [clojure.walk :as walk])
   (:require [net.cgrand.enlive-html :as html]))
 
-;   (defn print-headlines-and-points  []
-;        (doseq  [line  (map #(str %1  " (" %2  ")")  (hn-headlines)  (hn-points))]
-;             (println line)))
-
 (defn lemmas-url [word]
   (java.net.URL.
     (str "https://filosoft.ee/lemma_et/lemma.cgi?word=" word)))
