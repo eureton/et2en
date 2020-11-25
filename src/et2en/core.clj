@@ -85,6 +85,6 @@
   2. transforms records into a print-friendly format
   3. prints records to stdout"
   [& args]
-  (let [records (apply inflate-records args)]
+  (let [records (apply inflate-records (distinct args))]
     (->> records denormalize deduplicate walk/stringify-keys pp/print-table)))
 
