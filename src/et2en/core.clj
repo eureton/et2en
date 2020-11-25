@@ -84,7 +84,10 @@
           (deduplicate (rest records) (conj words word)))))))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Program entry point:
+  1. builds a record for each word
+  2. transforms records into a print-friendly format
+  3. prints records to stdout"
   [& args]
   (let [records (apply inflate-records args)]
     (->> records denormalize deduplicate walk/stringify-keys pp/print-table)))
