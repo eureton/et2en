@@ -35,15 +35,28 @@
     (java.net.URL.
       (str "https://glosbe.com/et/en/" word))))
 
+(defn scrape-definitions [dictionary-html]
+  (map html/text (html/select dictionary-html [:div.text-info :strong.phr])))
+
+(defn scrape-parts-of-speech [dictionary-html]
+  (->>
+    (html/select dictionary-html [:div.text-info :div.gender-n-phrase])
+    (map html/text)
+    (map str/split-lines)
+    flatten
+    (map #(str/replace % #"[\s|{|}]*" ""))
+    (remove str/blank?)))
+
 (defn fetch-definitions [word]
-  (into []
+  (let [html (dictionary word)]
     (map
-      html/text
-      (html/select (dictionary word) [:strong.phr]))))
+      (fn [definition pos] {:word definition :pos pos})
+      (scrape-definitions html)
+      (scrape-parts-of-speech html))))
 
 (defn inflate-lemma [lemma]
   {:form lemma
-   :definition (fetch-definitions lemma)})
+   :definitions (fetch-definitions lemma)})
 
 (def into-lemmas
   (comp
@@ -64,7 +77,7 @@
         (map
           (fn [lemma] {:word (record :word)
                        :lemma (lemma :form)
-                       :definition (str/join ", " (lemma :definition))})
+                       :definition (str/join ", " (map #(% :word) (lemma :definitions)))})
           (record :lemmas)))
       records)))
 
