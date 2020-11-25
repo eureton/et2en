@@ -4,15 +4,41 @@ Translate from Estonian to English on the command line.
 
 ## Installation
 
+Clone this repo:
+
+```
+    $ git clone https://github.com/eureton/et2en.git
+    $ cd et2en/
+````
+
 ## Usage
 
-FIXME: explanation
+1. Setup `JAVA_HOME`.
+1. Add the `$JAVA_HOME/bin` directory to your `PATH`.
+1. Run the standalone jar with words as arguments:
 
-    $ java -jar et2en-0.1.0-standalone.jar [args]
+  ```
+      $ java -jar et2en-0.1.0-standalone.jar [args]
+  ```
 
 ## Options
 
 ## Examples
+
+`porise` could be either:
+
+* the adjective `porine` in genitive singular or
+* the verb `porisema` in 2nd person singular imperative
+
+```
+    $ java -jar et2en-0.1.0-standalone.jar porise
+
+|   word |    lemma |              definition |
+|--------+----------+-------------------------|
+| porise |   porine | muddy, soiled, begrimed |
+|        | porisema |           gnarl, witter |
+
+```
 
 ### Bugs
 
