@@ -3,7 +3,9 @@
   (:require [clojure.string :as str])
   (:require [clojure.pprint :as pp])
   (:require [clojure.walk :as walk])
-  (:require [net.cgrand.enlive-html :as html]))
+  (:require [net.cgrand.enlive-html :as html])
+  (:require [clj-http.client :as client])
+  (:import (org.jsoup Jsoup)))
 
 (defn lemmas-url [word]
   (java.net.URL.
@@ -29,6 +31,25 @@
                 (map
                   html/text
                   (html/select lemma-html [:body]))))))))))
+
+(defn pos-html [word]
+  (let [url "https://filosoft.ee/html_morf_et/html_morf.cgi"
+        params {:form-params {:doc word}}]
+    ((client/post url params) :body)))
+
+(defn scrape-pos [pos-html]
+  (->>
+    (.select (Jsoup/parse pos-html) "body table tr")
+    (map #(.text %))
+    (map #(re-find #"_S_.*((?:sg|pl)).*((?:n|g|p|in|ill|el|ad|all|abl|tr|es|ter|kom|ab))," %))
+    (map rest)
+    (map #(str/join " " %))
+    first))
+
+(def into-pos
+  (comp
+    (map pos-html)
+    (map scrape-pos)))
 
 (defn dictionary [word]
   (html/html-resource
@@ -67,8 +88,10 @@
 (defn inflate-records [& words]
   (let [inflated-words (map #(hash-map :word %) words)
         lemma-packs (into [] into-lemmas words)
-        inflated-lemmas (map #(hash-map :lemmas (mapv inflate-lemma %)) lemma-packs)]
-    (map merge inflated-words inflated-lemmas)))
+        inflated-lemmas (map #(hash-map :lemmas (mapv inflate-lemma %)) lemma-packs)
+        pos-packs (into [] into-pos words)
+        inflated-pos (map #(hash-map :pos %) pos-packs)]
+    (map merge inflated-words inflated-lemmas inflated-pos)))
 
 (defn denormalize [records]
   (flatten
@@ -76,6 +99,7 @@
       (fn [record]
         (map
           (fn [lemma] {:word (record :word)
+                       :pos (record :pos)
                        :lemma (lemma :form)
                        :definition (str/join ", " (map #(% :word) (lemma :definitions)))})
           (record :lemmas)))
