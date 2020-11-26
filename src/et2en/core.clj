@@ -98,10 +98,11 @@
     (map
       (fn [record]
         (map
-          (fn [lemma] {:word (record :word)
-                       :pos (record :pos)
-                       :lemma (lemma :form)
-                       :definition (str/join ", " (map #(% :word) (lemma :definitions)))})
+          (fn [lemma]
+            {:word (record :word)
+             :pos (record :pos)
+             :lemma (lemma :form)
+             :definition (->> (lemma :definitions) (map :word) distinct (str/join ", "))})
           (record :lemmas)))
       records)))
 
