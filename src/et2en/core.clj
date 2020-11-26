@@ -36,15 +36,12 @@
   (->>
     (.select (Jsoup/parse pos-html) "body table tr")
     (map #(.text %))
-    (map #(re-find #"_S_.*((?:sg|pl)).*((?:n|g|p|in|ill|el|ad|all|abl|tr|es|ter|kom|ab))," %))
-    (map rest)
-    (map #(str/join " " %))
-    first))
-
-(def into-pos
-  (comp
-    (map pos-html)
-    (map scrape-pos)))
+    first
+    (re-seq #"_([S|A|D|V])_")
+    (map #(get % 1))
+    (map #(case % "S" "n" "A" "adj" "D" "adv" "V" "v"))
+    distinct
+    (str/join ", ")))
 
 (defn dictionary [word]
   (html/html-resource
@@ -72,7 +69,8 @@
 
 (defn inflate-lemma [lemma]
   {:form lemma
-   :definitions (fetch-definitions lemma)})
+   :definitions (fetch-definitions lemma)
+   :pos (scrape-pos (pos-html lemma))})
 
 (def into-lemmas
   (comp
@@ -83,10 +81,8 @@
 (defn inflate-records [& words]
   (let [inflated-words (map #(hash-map :word %) words)
         lemma-packs (into [] into-lemmas words)
-        inflated-lemmas (map #(hash-map :lemmas (mapv inflate-lemma %)) lemma-packs)
-        pos-packs (into [] into-pos words)
-        inflated-pos (map #(hash-map :pos %) pos-packs)]
-    (map merge inflated-words inflated-lemmas inflated-pos)))
+        inflated-lemmas (map #(hash-map :lemmas (mapv inflate-lemma %)) lemma-packs)]
+    (map merge inflated-words inflated-lemmas)))
 
 (defn denormalize [records]
   (flatten
@@ -95,7 +91,7 @@
         (map
           (fn [lemma]
             {:word (record :word)
-             :pos (record :pos)
+             :pos (lemma :pos)
              :lemma (lemma :form)
              :definition (->> (lemma :definitions) (map :word) distinct (str/join ", "))})
           (record :lemmas)))
