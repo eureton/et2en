@@ -15,22 +15,17 @@
   (html/html-resource lemma-url))
 
 (defn scrape-lemmas [lemma-html]
-  (into []
-    (remove
-      str/blank?
-      (flatten
-        (map
-          #(str/split % #"Sõna lemma(d)? on:")
-          (remove
-            #(or
-               (str/includes? % "Copyright")
-               (str/includes? % "lemmatiseerija")
-               (str/blank? %))
-            (str/split-lines
-              (first
-                (map
-                  html/text
-                  (html/select lemma-html [:body]))))))))))
+  (->>
+    (html/select lemma-html [:body])
+    (map html/text)
+    first
+    str/split-lines
+    (str/join " ")
+    (re-find #"lemma[d]? on:(.*)Copyright")
+    rest
+    (map str/trim)
+    (map #(str/split % #" "))
+    flatten))
 
 (defn pos-html [word]
   (let [url "https://filosoft.ee/html_morf_et/html_morf.cgi"
