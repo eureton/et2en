@@ -40,8 +40,7 @@
     (re-seq #"_([S|A|D|V])_")
     (map #(get % 1))
     (map #(case % "S" "n" "A" "adj" "D" "adv" "V" "v"))
-    distinct
-    (str/join ", ")))
+    distinct))
 
 (defn definition-url [word]
   (java.net.URL. (str "https://glosbe.com/et/en/" word)))
@@ -114,7 +113,7 @@
         (map
           (fn [lemma]
             {:word (record :word)
-             :pos (lemma :pos)
+             :pos (str/join ", " (lemma :pos))
              :lemma (lemma :form)
              :definition (->> (lemma :definitions) distinct (str/join ", "))})
           (record :lemmas)))
