@@ -43,17 +43,18 @@
     distinct
     (str/join ", ")))
 
-(defn dictionary [word]
-  (html/html-resource
-    (java.net.URL.
-      (str "https://glosbe.com/et/en/" word))))
+(defn definition-url [word]
+  (java.net.URL. (str "https://glosbe.com/et/en/" word)))
 
-(defn scrape-definitions [dictionary-html]
-  (map html/text (html/select dictionary-html [:div.text-info :strong.phr])))
+(defn definition-html [url]
+  (html/html-resource url))
 
-(defn scrape-parts-of-speech [dictionary-html]
+(defn scrape-definitions [html]
+  (map html/text (html/select html [:div.text-info :strong.phr])))
+
+(defn scrape-parts-of-speech [html]
   (->>
-    (html/select dictionary-html [:div.text-info :div.gender-n-phrase])
+    (html/select html [:div.text-info :div.gender-n-phrase])
     (map html/text)
     (map str/split-lines)
     flatten
@@ -61,16 +62,23 @@
     (remove str/blank?)))
 
 (defn fetch-definitions [word]
-  (let [html (dictionary word)]
+  (let [html (definition-html (definition-url word))]
     (map
       (fn [definition pos] {:word definition :pos pos})
       (scrape-definitions html)
       (scrape-parts-of-speech html))))
 
-(defn inflate-lemma [lemma]
+(defn inflate-lemma [lemma definitions pos]
   {:form lemma
-   :definitions (fetch-definitions lemma)
-   :pos (scrape-pos (pos-html lemma))})
+   :definitions definitions
+   :pos pos})
+
+(defn combine [xs xf]
+  (reduce
+    merge
+    (map
+      #(apply hash-map %)
+      (mapcat hash-map xs (into [] xf xs)))))
 
 (def words-to-lemmas
   (comp
@@ -78,10 +86,24 @@
     (map lemmas-html)
     (map scrape-lemmas)))
 
+(def lemmas-to-definitions
+  (comp
+    (map definition-url)
+    (map definition-html)
+    (map scrape-definitions)))
+
+(def lemmas-to-pos
+  (comp
+    (map pos-html)
+    (map scrape-pos)))
+
 (defn inflate-records [& words]
-  (let [inflated-words (map #(hash-map :word %) words)
-        lemma-packs (into [] words-to-lemmas words)
-        inflated-lemmas (map #(hash-map :lemmas (mapv inflate-lemma %)) lemma-packs)]
+  (let [ws2ls (combine words words-to-lemmas)
+        ls (flatten (vals ws2ls))
+        ls2ds (combine ls lemmas-to-definitions)
+        ls2ps (combine ls lemmas-to-pos)
+        inflated-words (map #(hash-map :word %) words)
+        inflated-lemmas (map (fn [w] (hash-map :lemmas (map #(inflate-lemma % (ls2ds %) (ls2ps %)) (ws2ls w)))) words)]
     (map merge inflated-words inflated-lemmas)))
 
 (defn denormalize [records]
@@ -93,7 +115,7 @@
             {:word (record :word)
              :pos (lemma :pos)
              :lemma (lemma :form)
-             :definition (->> (lemma :definitions) (map :word) distinct (str/join ", "))})
+             :definition (->> (lemma :definitions) distinct (str/join ", "))})
           (record :lemmas)))
       records)))
 
