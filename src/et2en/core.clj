@@ -72,7 +72,7 @@
    :definitions (fetch-definitions lemma)
    :pos (scrape-pos (pos-html lemma))})
 
-(def into-lemmas
+(def words-to-lemmas
   (comp
     (map lemmas-url)
     (map lemmas-html)
@@ -80,7 +80,7 @@
 
 (defn inflate-records [& words]
   (let [inflated-words (map #(hash-map :word %) words)
-        lemma-packs (into [] into-lemmas words)
+        lemma-packs (into [] words-to-lemmas words)
         inflated-lemmas (map #(hash-map :lemmas (mapv inflate-lemma %)) lemma-packs)]
     (map merge inflated-words inflated-lemmas)))
 
