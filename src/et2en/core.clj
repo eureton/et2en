@@ -3,25 +3,9 @@
   (:require [clojure.string :as str])
   (:require [clojure.pprint :as pp])
   (:require [clojure.walk :as walk])
-  (:require [clj-http.client :as client])
   (:require [et2en.lemma :as lemma])
   (:require [et2en.definition :as definition])
-  (:import (org.jsoup Jsoup)))
-
-(defn pos-html [word]
-  (let [url "https://filosoft.ee/html_morf_et/html_morf.cgi"
-        params {:form-params {:doc word}}]
-    ((client/post url params) :body)))
-
-(defn scrape-pos [pos-html]
-  (->>
-    (.select (Jsoup/parse pos-html) "body table tr")
-    (map #(.text %))
-    first
-    (re-seq #"_([S|A|D|V])_")
-    (map #(get % 1))
-    (map #(case % "S" "n" "A" "adj" "D" "adv" "V" "v"))
-    distinct))
+  (:require [et2en.pos :as pos]))
 
 (defn inflate-lemma [lemma definitions pos]
   {:form lemma
@@ -35,16 +19,11 @@
       #(apply hash-map %)
       (mapcat hash-map xs (into [] xf xs)))))
 
-(def lemmas-to-pos
-  (comp
-    (map pos-html)
-    (map scrape-pos)))
-
 (defn inflate-records [& words]
   (let [ws2ls (combine words lemma/words-to-lemmas)
         ls (flatten (vals ws2ls))
         ls2ds (combine ls definition/lemmas-to-definitions)
-        ls2ps (combine ls lemmas-to-pos)]
+        ls2ps (combine ls pos/lemmas-to-pos)]
     (map
       (fn [w] {:word w
                :lemmas (map #(inflate-lemma % (ls2ds %) (ls2ps %)) (ws2ls w))})
