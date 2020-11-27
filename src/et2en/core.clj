@@ -7,11 +7,6 @@
   (:require [et2en.definition :as definition])
   (:require [et2en.pos :as pos]))
 
-(defn inflate-lemma [lemma definitions pos]
-  {:form lemma
-   :definitions definitions
-   :pos pos})
-
 (defn combine [xs xf]
   (reduce
     merge
@@ -23,10 +18,10 @@
   (let [ws2ls (combine words lemma/words-to-lemmas)
         ls (flatten (vals ws2ls))
         ls2ds (combine ls definition/lemmas-to-definitions)
-        ls2ps (combine ls pos/lemmas-to-pos)]
+        ls2ps (combine ls pos/lemmas-to-pos)
+        ws2ils #(hash-map :form % :definitions (ls2ds %) :pos (ls2ps %))]
     (map
-      (fn [w] {:word w
-               :lemmas (map #(inflate-lemma % (ls2ds %) (ls2ps %)) (ws2ls w))})
+      #(hash-map :word % :lemmas (map ws2ils (ws2ls %)))
       words)))
 
 (defn denormalize [records]
