@@ -14,15 +14,26 @@
       #(apply hash-map %)
       (mapcat hash-map xs (into [] xf xs)))))
 
+(defn inflate-lemma [lemma definition pos]
+  {:form lemma :definitions definition :pos pos})
+
 (defn inflate-records [& words]
   (let [ws2ls (combine words lemma/words-to-lemmas)
         ls (flatten (vals ws2ls))
         ls2ds (combine ls definition/lemmas-to-definitions)
         ls2ps (combine ls pos/lemmas-to-pos)
-        ws2ils #(hash-map :form % :definitions (ls2ds %) :pos (ls2ps %))]
+        ls2ils #(inflate-lemma % (ls2ds %) (ls2ps %))]
     (map
-      #(hash-map :word % :lemmas (map ws2ils (ws2ls %)))
+      #(hash-map :word % :lemmas (map ls2ils (ws2ls %)))
       words)))
+
+(def not-available (inflate-lemma "--" '("--") '("--")))
+
+(defn patch-missing [record]
+  (if
+    (empty? (record :lemmas))
+    (merge record {:lemmas (list not-available)})
+    record))
 
 (defn denormalize [records]
   (flatten
@@ -55,5 +66,11 @@
   3. prints records to stdout"
   [& args]
   (let [records (apply inflate-records (distinct args))]
-    (->> records denormalize deduplicate walk/stringify-keys pp/print-table)))
+    (->>
+      records
+      (map patch-missing)
+      denormalize
+      deduplicate
+      walk/stringify-keys
+      pp/print-table)))
 
