@@ -101,10 +101,11 @@
   (let [ws2ls (combine words words-to-lemmas)
         ls (flatten (vals ws2ls))
         ls2ds (combine ls lemmas-to-definitions)
-        ls2ps (combine ls lemmas-to-pos)
-        inflated-words (map #(hash-map :word %) words)
-        inflated-lemmas (map (fn [w] (hash-map :lemmas (map #(inflate-lemma % (ls2ds %) (ls2ps %)) (ws2ls w)))) words)]
-    (map merge inflated-words inflated-lemmas)))
+        ls2ps (combine ls lemmas-to-pos)]
+    (map
+      (fn [w] {:word w
+               :lemmas (map #(inflate-lemma % (ls2ds %) (ls2ps %)) (ws2ls w))})
+      words)))
 
 (defn denormalize [records]
   (flatten
