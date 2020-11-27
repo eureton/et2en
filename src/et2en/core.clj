@@ -3,30 +3,10 @@
   (:require [clojure.string :as str])
   (:require [clojure.pprint :as pp])
   (:require [clojure.walk :as walk])
-  (:require [net.cgrand.enlive-html :as html])
   (:require [clj-http.client :as client])
+  (:require [et2en.lemma :as lemma])
   (:require [et2en.definition :as definition])
   (:import (org.jsoup Jsoup)))
-
-(defn lemmas-url [word]
-  (java.net.URL.
-    (str "https://filosoft.ee/lemma_et/lemma.cgi?word=" word)))
-
-(defn lemmas-html [lemma-url]
-  (html/html-resource lemma-url))
-
-(defn scrape-lemmas [lemma-html]
-  (->>
-    (html/select lemma-html [:body])
-    (map html/text)
-    first
-    str/split-lines
-    (str/join " ")
-    (re-find #"lemma[d]? on:(.*)Copyright")
-    rest
-    (map str/trim)
-    (map #(str/split % #" "))
-    flatten))
 
 (defn pos-html [word]
   (let [url "https://filosoft.ee/html_morf_et/html_morf.cgi"
@@ -55,19 +35,13 @@
       #(apply hash-map %)
       (mapcat hash-map xs (into [] xf xs)))))
 
-(def words-to-lemmas
-  (comp
-    (map lemmas-url)
-    (map lemmas-html)
-    (map scrape-lemmas)))
-
 (def lemmas-to-pos
   (comp
     (map pos-html)
     (map scrape-pos)))
 
 (defn inflate-records [& words]
-  (let [ws2ls (combine words words-to-lemmas)
+  (let [ws2ls (combine words lemma/words-to-lemmas)
         ls (flatten (vals ws2ls))
         ls2ds (combine ls definition/lemmas-to-definitions)
         ls2ps (combine ls lemmas-to-pos)]
