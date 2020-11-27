@@ -65,12 +65,13 @@
   2. transforms records into a print-friendly format
   3. prints records to stdout"
   [& args]
-  (let [records (apply inflate-records (distinct args))]
-    (->>
-      records
-      (map patch-missing)
-      denormalize
-      deduplicate
-      walk/stringify-keys
-      pp/print-table)))
+  (->>
+    args
+    distinct
+    (apply inflate-records)
+    (map patch-missing)
+    denormalize
+    deduplicate
+    walk/stringify-keys
+    pp/print-table))
 
