@@ -8,9 +8,9 @@
         params {:form-params {:doc word}}]
     ((client/post url params) :body)))
 
-(defn scrape-pos [pos-html]
+(defn scrape-pos [html]
   (->>
-    (.select (Jsoup/parse pos-html) "body table tr")
+    (.select (Jsoup/parse html) "body table tr")
     (map #(.text %))
     first
     (re-seq #"_([S|A|D|V])_")
