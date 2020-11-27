@@ -7,12 +7,12 @@
   (java.net.URL.
     (str "https://filosoft.ee/lemma_et/lemma.cgi?word=" word)))
 
-(defn lemmas-html [lemma-url]
-  (enlive/html-resource lemma-url))
+(defn lemmas-html [url]
+  (enlive/html-resource url))
 
-(defn scrape-lemmas [lemma-html]
+(defn scrape-lemmas [html]
   (->>
-    (enlive/select lemma-html [:body])
+    (enlive/select html [:body])
     (map enlive/text)
     first
     str/split-lines
