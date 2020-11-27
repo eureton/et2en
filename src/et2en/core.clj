@@ -5,6 +5,7 @@
   (:require [clojure.walk :as walk])
   (:require [net.cgrand.enlive-html :as html])
   (:require [clj-http.client :as client])
+  (:require [et2en.definition :as definition])
   (:import (org.jsoup Jsoup)))
 
 (defn lemmas-url [word]
@@ -42,31 +43,6 @@
     (map #(case % "S" "n" "A" "adj" "D" "adv" "V" "v"))
     distinct))
 
-(defn definition-url [word]
-  (java.net.URL. (str "https://glosbe.com/et/en/" word)))
-
-(defn definition-html [url]
-  (html/html-resource url))
-
-(defn scrape-definitions [html]
-  (map html/text (html/select html [:div.text-info :strong.phr])))
-
-(defn scrape-parts-of-speech [html]
-  (->>
-    (html/select html [:div.text-info :div.gender-n-phrase])
-    (map html/text)
-    (map str/split-lines)
-    flatten
-    (map #(str/replace % #"[\s|{|}]*" ""))
-    (remove str/blank?)))
-
-(defn fetch-definitions [word]
-  (let [html (definition-html (definition-url word))]
-    (map
-      (fn [definition pos] {:word definition :pos pos})
-      (scrape-definitions html)
-      (scrape-parts-of-speech html))))
-
 (defn inflate-lemma [lemma definitions pos]
   {:form lemma
    :definitions definitions
@@ -85,12 +61,6 @@
     (map lemmas-html)
     (map scrape-lemmas)))
 
-(def lemmas-to-definitions
-  (comp
-    (map definition-url)
-    (map definition-html)
-    (map scrape-definitions)))
-
 (def lemmas-to-pos
   (comp
     (map pos-html)
@@ -99,7 +69,7 @@
 (defn inflate-records [& words]
   (let [ws2ls (combine words words-to-lemmas)
         ls (flatten (vals ws2ls))
-        ls2ds (combine ls lemmas-to-definitions)
+        ls2ds (combine ls definition/lemmas-to-definitions)
         ls2ps (combine ls lemmas-to-pos)]
     (map
       (fn [w] {:word w
