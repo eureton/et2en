@@ -84,10 +84,6 @@
     (#(list (extract-noun-or-adjective %) (extract-adverb %) (extract-verb %)))
     flatten
     ))
-    ;(re-seq re-n-adj %) (re-seq re-v %) (re-seq re-adv %))
-    ; (map rest)
-    ; (map #(zipmap [:pos1 :tense :case :pos3 :pos2 :person-tense-mood] %))
-    ; (map #(hash-map :pos (extract-pos %) :gram (extract-gram %)))
 
 (def words-to-grammar
   (comp
