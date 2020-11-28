@@ -48,6 +48,12 @@
     (merge record {:lemmas (list not-available)})
     record))
 
+(defn to-display-string [coll sep lim]
+  (let [distinct-coll (distinct coll)]
+    (if (<= (reduce + (map count (interpose sep distinct-coll))) lim)
+      (str/join sep distinct-coll)
+      (to-display-string (butlast distinct-coll) sep lim))))
+
 (defn denormalize [records]
   (flatten
     (map
@@ -55,10 +61,10 @@
         (map
           (fn [lemma]
             {:word (record :word)
-             :pos (->> (lemma :pos) distinct (str/join ", "))
+             :pos (to-display-string (lemma :pos) ", " 8)
              :lemma (lemma :form)
-             :gram (str/join ", " (lemma :gram))
-             :definition (->> (lemma :definitions) distinct (str/join ", "))})
+             :gram (to-display-string (lemma :gram) ", " 8)
+             :definition (to-display-string (lemma :definitions) ", " 64)})
           (record :lemmas)))
       records)))
 
