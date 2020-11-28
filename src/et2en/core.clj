@@ -55,7 +55,7 @@
         (map
           (fn [lemma]
             {:word (record :word)
-             :pos (->> (lemma :pos) distinct ( str/join ", "))
+             :pos (->> (lemma :pos) distinct (str/join ", "))
              :lemma (lemma :form)
              :gram (str/join ", " (lemma :gram))
              :definition (->> (lemma :definitions) distinct (str/join ", "))})
@@ -63,7 +63,8 @@
       records)))
 
 (defn deduplicate
-  ([records] (deduplicate records #{}))
+  ([records]
+   (deduplicate records #{}))
   ([records, words]
     (if (empty? records)
       records
