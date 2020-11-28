@@ -4,6 +4,7 @@
   (:require [clojure.pprint :as pp])
   (:require [clojure.walk :as walk])
   (:require [et2en.lemma :as lemma])
+  (:require [et2en.grammar :as grammar])
   (:require [et2en.definition :as definition])
   (:require [et2en.pos :as pos]))
 
@@ -14,20 +15,34 @@
       #(apply hash-map %)
       (mapcat hash-map xs (into [] xf xs)))))
 
-(defn inflate-lemma [lemma definition pos]
-  {:form lemma :definitions definition :pos pos})
+(defn inflate-lemma [lemma definition pos gram]
+  {:form lemma
+   :definitions definition
+   :pos pos
+   :gram gram})
 
 (defn inflate-records [& words]
   (let [ws2ls (combine words lemma/words-to-lemmas)
+        ws2gs (combine words grammar/words-to-grammar)
         ls (flatten (vals ws2ls))
         ls2ds (combine ls definition/lemmas-to-definitions)
-        ls2ps (combine ls pos/lemmas-to-pos)
-        ls2ils #(inflate-lemma % (ls2ds %) (ls2ps %))]
+        ls2ps (combine ls pos/lemmas-to-pos)]
     (map
-      #(hash-map :word % :lemmas (map ls2ils (ws2ls %)))
+      (fn [w] {:word w
+               :lemmas (map
+                         (fn [l]
+                           (let [ps (ls2ps l)
+                                 gs (ws2gs w)
+                                 relevant? #(contains? (set ps) (% :pos))]
+                             (inflate-lemma
+                               l
+                               (ls2ds l)
+                               ps
+                               (->> gs (filter relevant?) (map :gram)))))
+                         (ws2ls w))})
       words)))
 
-(def not-available (inflate-lemma "--" '("--") '("--")))
+(def not-available (inflate-lemma "--" '("--") '("--") '("--")))
 
 (defn patch-missing [record]
   (if
@@ -44,6 +59,7 @@
             {:word (record :word)
              :pos (str/join ", " (lemma :pos))
              :lemma (lemma :form)
+             :gram (str/join ", " (lemma :gram))
              :definition (->> (lemma :definitions) distinct (str/join ", "))})
           (record :lemmas)))
       records)))
