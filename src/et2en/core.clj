@@ -28,18 +28,18 @@
         ls2ds (combine ls definition/lemmas-to-definitions)
         ls2ps (combine ls pos/lemmas-to-pos)]
     (map
-      (fn [w] {:word w
-               :lemmas (map
-                         (fn [l]
-                           (let [ps (ls2ps l)
-                                 gs (ws2gs w)
-                                 relevant? #(contains? (set ps) (% :pos))]
-                             (inflate-lemma
-                               l
-                               (ls2ds l)
-                               ps
-                               (->> gs (filter relevant?) (map :gram)))))
-                         (ws2ls w))})
+      (fn [w]
+        {:word w
+         :lemmas (map
+                   (fn [l]
+                     (let [relevant? #(= (% :lemma) l)
+                           relevant-gs (filter relevant? (ws2gs w))]
+                       (inflate-lemma
+                         l
+                         (ls2ds l)
+                         (map :pos relevant-gs)
+                         (map :gram relevant-gs))))
+                   (ws2ls w))})
       words)))
 
 (def not-available (inflate-lemma "--" '("--") '("--") '("--")))
@@ -57,7 +57,7 @@
         (map
           (fn [lemma]
             {:word (record :word)
-             :pos (str/join ", " (lemma :pos))
+             :pos (->> (lemma :pos) distinct ( str/join ", "))
              :lemma (lemma :form)
              :gram (str/join ", " (lemma :gram))
              :definition (->> (lemma :definitions) distinct (str/join ", "))})

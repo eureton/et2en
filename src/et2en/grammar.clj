@@ -9,11 +9,25 @@
         params {:form-params {:doc word}}]
     ((client/post url params) :body)))
 
-(def re-n-adj #"_([S|A])_.*(sg|pl).*(n|g|p|in|ill|el|ad|all|abl|kom|ab|es|tr|ter),")
+(defn cat-re [& patterns]
+  (re-pattern (apply str patterns)))
 
-(def re-adv #"_([D])_")
+(def re-lemma #"(\p{IsAlphabetic}+)\+[^,]*\/\/")
 
-(def re-v #"_(V)_.*(ma|da|nud|tud|n|d|b|me|te|vad|sin|sin|s|sime|site|sid|o|gu|ge|mast|mata|des|v|tav|ksin|ksid|ks|ksime|ksite|ksid|vat),")
+(def re-number #"(sg|pl)")
+
+(def re-case #"(n|g|p|in|ill|el|ad|all|abl|kom|ab|es|tr|ter)")
+
+(def re-verb-form #"(ma|da|nud|tud|n|d|b|me|te|vad|sin|sin|s|sime|site|sid|o|gu|ge|mast|mata|des|v|tav|ksin|ksid|ks|ksime|ksite|ksid|vat)")
+
+(def re-noun-adjective
+  (cat-re re-lemma #"_([S|A])_." re-number #"." re-case #","))
+
+(def re-adverb
+  (cat-re re-lemma #"_([D])_"))
+
+(def re-verb
+  (cat-re re-lemma #"_(V)_." re-verb-form #","))
 
 (defn extract-pos [x]
   (case (x :pos) "S" "n" "A" "adj" "D" "adv" "V" "v"))
@@ -57,24 +71,29 @@
 
 (defn extract-noun-or-adjective [s]
   (->>
-    (re-seq re-n-adj s)
+    (re-seq re-noun-adjective s)
     (map rest)
-    (map #(zipmap [:pos :number :case] %))
-    (map #(hash-map :pos (extract-pos %) :gram (str (% :number) " " (% :case))))))
+    (map #(zipmap [:lemma :pos :number :case] %))
+    (map #(hash-map :lemma (% :lemma) :pos (extract-pos %) :gram (str (% :number) " " (% :case))))))
 
 (defn extract-adverb [s]
   (->>
-    (re-seq re-adv s)
+    (re-seq re-adverb s)
     (map rest)
-    (map #(zipmap [:pos] %))
-    (map #(hash-map :pos (extract-pos %)))))
+    (map #(zipmap [:lemma :pos] %))
+    (map #(hash-map :lemma (% :lemma) :pos (extract-pos %)))))
+
+(defn inflate-verb [re-match]
+  {:pos (extract-pos re-match)
+   :gram (extract-gram re-match)
+   :lemma (str (re-match :lemma) "ma")})
 
 (defn extract-verb [s]
   (->>
-    (re-seq re-v s)
+    (re-seq re-verb s)
     (map rest)
-    (map #(zipmap [:pos :person-tense-mood] %))
-    (map #(hash-map :pos (extract-pos %) :gram (extract-gram %)))))
+    (map #(zipmap [:lemma :pos :person-tense-mood] %))
+    (map inflate-verb)))
 
 (defn scrape-grammar [html]
   (->>
