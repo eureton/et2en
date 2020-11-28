@@ -50,7 +50,7 @@
 
 (defn to-display-string [coll sep lim]
   (let [distinct-coll (distinct coll)]
-    (if (<= (reduce + (map count (interpose sep distinct-coll))) lim)
+    (if (->> distinct-coll (interpose sep) (map count) (reduce +) (>= lim))
       (str/join sep distinct-coll)
       (to-display-string (butlast distinct-coll) sep lim))))
 
