@@ -5,8 +5,7 @@
   (:require [clojure.walk :as walk])
   (:require [et2en.lemma :as lemma])
   (:require [et2en.grammar :as grammar])
-  (:require [et2en.definition :as definition])
-  (:require [et2en.pos :as pos]))
+  (:require [et2en.definition :as definition]))
 
 (defn combine [xs xf]
   (reduce
@@ -25,8 +24,7 @@
   (let [ws2ls (combine words lemma/words-to-lemmas)
         ws2gs (combine words grammar/words-to-grammar)
         ls (flatten (vals ws2ls))
-        ls2ds (combine ls definition/lemmas-to-definitions)
-        ls2ps (combine ls pos/lemmas-to-pos)]
+        ls2ds (combine ls definition/lemmas-to-definitions)]
     (map
       (fn [w]
         {:word w
