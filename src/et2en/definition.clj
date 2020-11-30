@@ -1,15 +1,19 @@
 (ns et2en.definition
   (:gen-class)
-  (:require [net.cgrand.enlive-html :as enlive]))
+  (:require [clj-http.client :as http])
+  (:import (org.jsoup Jsoup)))
 
 (defn definition-url [word]
-  (java.net.URL. (str "https://glosbe.com/et/en/" word)))
+  (str "https://glosbe.com/et/en/" word))
 
 (defn definition-html [url]
-  (enlive/html-resource url))
+  ((http/get url) :body))
 
 (defn scrape-definitions [html]
-  (map enlive/text (enlive/select html [:div.text-info :strong.phr])))
+  (->>
+    (.select (Jsoup/parse html) "div.text-info strong.phr")
+    (map #(.text %))
+    flatten))
 
 (def lemmas-to-definitions
   (comp
