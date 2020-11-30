@@ -3,16 +3,22 @@
   (:require [clojure.string :as str])
   (:require [clojure.pprint :as pp])
   (:require [clojure.walk :as walk])
+  (:require [clojure.core.async :as async])
   (:require [et2en.lemma :as lemma])
   (:require [et2en.grammar :as grammar])
   (:require [et2en.definition :as definition]))
 
-(defn combine [xs xf]
-  (reduce
-    merge
-    (map
-      #(apply hash-map %)
-      (mapcat hash-map xs (into [] xf xs)))))
+(defn combine [coll xform]
+  (let [from-chan (async/chan)
+        to-chan (async/chan)]
+    (->>
+      (do
+        (async/pipeline-blocking (count coll) to-chan xform from-chan)
+        (async/onto-chan!! from-chan coll)
+        (async/<!! (async/into [] to-chan)))
+      (mapcat hash-map coll)
+      (map #(apply hash-map %))
+      (reduce merge))))
 
 (defn inflate-lemma [lemma definition pos gram]
   {:form lemma
