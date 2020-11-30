@@ -69,7 +69,7 @@
             {:word (record :word)
              :pos (to-display-string (lemma :pos) ", " 8)
              :lemma (lemma :form)
-             :gram (to-display-string (lemma :gram) ", " 8)
+             :gram (to-display-string (lemma :gram) ", " 16)
              :definition (to-display-string (lemma :definitions) ", " 64)})
           (record :lemmas)))
       records)))
