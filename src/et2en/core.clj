@@ -86,6 +86,13 @@
           (merge record {:word (if (contains? words word) "" word)})
           (deduplicate (rest records) (conj words word)))))))
 
+(defn sanitize [& args]
+  (->>
+    args
+    (take 10)
+    distinct
+    (map #(subs % 0 (min (count %) 32)))))
+
 (defn -main
   "Program entry point:
   1. builds a record for each word
@@ -94,7 +101,7 @@
   [& args]
   (->>
     args
-    distinct
+    (apply sanitize)
     (apply inflate-records)
     (map patch-missing)
     denormalize
