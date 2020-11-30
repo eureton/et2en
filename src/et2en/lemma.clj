@@ -12,12 +12,12 @@
 
 (defn scrape-lemmas [html]
   (let [re-match (->>
-                     (.select (Jsoup/parse html) "body")
-                     (map #(.text %))
-                     first
-                     (re-find #"lemmad? on:(.*)Copyright")
-                     rest
-                     first)]
+                   (.select (Jsoup/parse html) "body")
+                   (map #(.text %))
+                   first
+                   (re-find #"lemmad? on:(.*)Copyright")
+                   rest
+                   first)]
     (remove
       str/blank?
       (-> re-match (or "") str/trim (str/split #"\s")))))
