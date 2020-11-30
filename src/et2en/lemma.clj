@@ -11,15 +11,16 @@
   ((http/get url) :body))
 
 (defn scrape-lemmas [html]
-  (let [lemmas-str (->>
+  (let [re-match (->>
                      (.select (Jsoup/parse html) "body")
                      (map #(.text %))
                      first
                      (re-find #"lemmad? on:(.*)Copyright")
-                     (drop 1)
-                     first
-                     str/trim)]
-    (str/split lemmas-str #"\s")))
+                     rest
+                     first)]
+    (remove
+      str/blank?
+      (-> re-match (or "") str/trim (str/split #"\s")))))
 
 (def words-to-lemmas
   (comp
