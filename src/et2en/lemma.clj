@@ -1,27 +1,25 @@
 (ns et2en.lemma
   (:gen-class)
   (:require [clojure.string :as str])
-  (:require [net.cgrand.enlive-html :as enlive]))
+  (:require [clj-http.client :as http])
+  (:import (org.jsoup Jsoup)))
 
 (defn lemmas-url [word]
-  (java.net.URL.
-    (str "https://filosoft.ee/lemma_et/lemma.cgi?word=" word)))
+  (str "https://filosoft.ee/lemma_et/lemma.cgi?word=" word))
 
 (defn lemmas-html [url]
-  (enlive/html-resource url))
+  ((http/get url) :body))
 
 (defn scrape-lemmas [html]
-  (->>
-    (enlive/select html [:body])
-    (map enlive/text)
-    first
-    str/split-lines
-    (str/join " ")
-    (re-find #"lemma[d]? on:(.*)Copyright")
-    rest
-    (map str/trim)
-    (map #(str/split % #" "))
-    flatten))
+  (let [lemmas-str (->>
+                     (.select (Jsoup/parse html) "body")
+                     (map #(.text %))
+                     first
+                     (re-find #"lemmad? on:(.*)Copyright")
+                     (drop 1)
+                     first
+                     str/trim)]
+    (str/split lemmas-str #"\s")))
 
 (def words-to-lemmas
   (comp
