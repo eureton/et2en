@@ -12,7 +12,7 @@
 (defn cat-re [& patterns]
   (re-pattern (apply str patterns)))
 
-(def re-lemma #"(\p{IsAlphabetic}+)\+[^,]*\/\/")
+(def re-lemma #"([_\p{IsAlphabetic}]+)\+[^,]*\/\/")
 
 (def re-number #"(sg|pl)")
 
@@ -69,19 +69,27 @@
     "takse" "pass pr"
     "ti" "pass iprf"))
 
+(defn extract-lemma [s]
+  (str/replace s "_" ""))
+
+(defn inflate-noun-or-adjective [re-match]
+  {:lemma (extract-lemma (re-match :lemma))
+   :pos (extract-pos re-match)
+   :gram (str (re-match :number) " " (re-match :case))})
+
 (defn extract-noun-or-adjective [s]
   (->>
     (re-seq re-noun-adjective s)
     (map rest)
     (map #(zipmap [:lemma :pos :number :case] %))
-    (map #(hash-map :lemma (% :lemma) :pos (extract-pos %) :gram (str (% :number) " " (% :case))))))
+    (map inflate-noun-or-adjective)))
 
 (defn extract-adverb [s]
   (->>
     (re-seq re-adverb s)
     (map rest)
     (map #(zipmap [:lemma :pos] %))
-    (map #(hash-map :lemma (% :lemma) :pos (extract-pos %)))))
+    (map #(hash-map :lemma (extract-lemma (% :lemma)) :pos (extract-pos %)))))
 
 (defn inflate-verb [re-match]
   {:pos (extract-pos re-match)
