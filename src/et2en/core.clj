@@ -106,8 +106,8 @@
 
 (defn -main
   "Program entry point:
-    1. confirms network connectivity
-    2. validates input
+    1. validates input
+    2. confirms network connectivity
     3. processes input"
   [& args]
   (let [{:keys [options exit-message ok?]} (validation/validate args)]
