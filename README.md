@@ -33,10 +33,10 @@ Clone this repo:
 ```
     $ java -jar et2en-0.1.0-standalone.jar porise
 
-|   word |    lemma |              definition |
-|--------+----------+-------------------------|
-| porise |   porine | muddy, soiled, begrimed |
-|        | porisema |           gnarl, witter |
+|   word | pos |    lemma |         gram |              definition |
+|--------+-----+----------+--------------+-------------------------|
+| porise | adj |   porine |         sg g | muddy, soiled, begrimed |
+|        |   v | porisema | 2nd-p sg imp |           gnarl, witter |
 
 ```
 
