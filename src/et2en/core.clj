@@ -7,7 +7,8 @@
   (:require [et2en.lemma :as lemma])
   (:require [et2en.grammar :as grammar])
   (:require [et2en.definition :as definition])
-  (:require [et2en.validation :as validation]))
+  (:require [et2en.validation :as validation])
+  (:require [et2en.cli :as cli]))
 
 (defn combine [coll xform]
   (let [from-chan (async/chan)
@@ -27,7 +28,7 @@
    :pos pos
    :gram gram})
 
-(defn inflate-records [& words]
+(defn inflate-records [words]
   (let [ws2ls (combine words lemma/words-to-lemmas)
         ws2gs (combine words grammar/words-to-grammar)
         ls (flatten (vals ws2ls))
@@ -87,30 +88,30 @@
           (merge record {:word (if (contains? words word) "" word)})
           (deduplicate (rest records) (conj words word)))))))
 
-(def error-messages
-  {:no-network "No network connection found. Please check and try again."})
-
-(def error-exit-codes
-  {:no-network 1})
-
-(defn exit [error-code]
-  (println (error-messages error-code))
-  (System/exit (error-exit-codes error-code)))
-
-(defn -main
-  "Program entry point:
-  1. builds a record for each word
-  2. transforms records into a print-friendly format
-  3. prints records to stdout"
-  [& args]
-  (when-not (validation/connected?) (exit :no-network))
+(defn process
+  "Processing pipeline for validated input:
+    1. builds a record for each word
+    2. transforms records into a print-friendly format
+    3. prints records to stdout"
+  [words]
   (->>
-    args
-    (apply validation/sanitize)
-    (apply inflate-records)
+    words
+    validation/sanitize
+    inflate-records
     (map patch-missing)
     denormalize
     deduplicate
     walk/stringify-keys
     pp/print-table))
+
+(defn -main
+  "Program entry point:
+    1. confirms network connectivity
+    2. validates input
+    3. processes input"
+  [& args]
+  (let [{:keys [options exit-message ok?]} (validation/validate args)]
+    (when exit-message (cli/exit exit-message (if ok? 0 1)))
+    (when-not (validation/connected?) (cli/exit :no-network))
+    (process (options :words))))
 
