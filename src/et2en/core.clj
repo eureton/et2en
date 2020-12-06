@@ -6,7 +6,8 @@
   (:require [clojure.core.async :as async])
   (:require [et2en.lemma :as lemma])
   (:require [et2en.grammar :as grammar])
-  (:require [et2en.definition :as definition]))
+  (:require [et2en.definition :as definition])
+  (:require [et2en.validation :as validation]))
 
 (defn combine [coll xform]
   (let [from-chan (async/chan)
@@ -86,15 +87,15 @@
           (merge record {:word (if (contains? words word) "" word)})
           (deduplicate (rest records) (conj words word)))))))
 
-(def alphabet #"[^A-Za-zŠšŽžÕõÄäÖöÜü]")
+(def error-messages
+  {:no-network "No network connection found. Please check and try again."})
 
-(defn sanitize [& args]
-  (->>
-    args
-    (take 10)
-    (map #(->> % (take 32) (apply str)))
-    (filter #(->> % (re-find alphabet) nil?))
-    distinct))
+(def error-exit-codes
+  {:no-network 1})
+
+(defn exit [error-code]
+  (println (error-messages error-code))
+  (System/exit (error-exit-codes error-code)))
 
 (defn -main
   "Program entry point:
@@ -102,9 +103,10 @@
   2. transforms records into a print-friendly format
   3. prints records to stdout"
   [& args]
+  (when-not (validation/connected?) (exit :no-network))
   (->>
     args
-    (apply sanitize)
+    (apply validation/sanitize)
     (apply inflate-records)
     (map patch-missing)
     denormalize
