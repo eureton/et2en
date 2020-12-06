@@ -86,12 +86,15 @@
           (merge record {:word (if (contains? words word) "" word)})
           (deduplicate (rest records) (conj words word)))))))
 
+(def alphabet #"[^A-Za-zŠšŽžÕõÄäÖöÜü]")
+
 (defn sanitize [& args]
   (->>
     args
     (take 10)
-    distinct
-    (map #(subs % 0 (min (count %) 32)))))
+    (map #(->> % (take 32) (apply str)))
+    (filter #(->> % (re-find alphabet) nil?))
+    distinct))
 
 (defn -main
   "Program entry point:
