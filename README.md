@@ -18,14 +18,18 @@ Clone this repo:
 1. Run the standalone jar with words as arguments:
 
   ```
-      $ java -jar et2en-0.1.0-standalone.jar [args]
+      $ java -jar et2en-0.1.0-standalone.jar [options] [word1 [word2 ...]]
   ```
 
 ## Options
 
+`-v` / `--version` displays the program version
+
+`-h` / `--help` displays the help message
+
 ## Examples
 
-`porise` could be either:
+In Estonian, the word `porise` could be either:
 
 * the adjective `porine` in genitive singular or
 * the verb `porisema` in 2nd person singular imperative
