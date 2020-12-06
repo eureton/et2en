@@ -1,4 +1,4 @@
-(defproject et2en "1.0.1"
+(defproject et2en "1.0.2"
   :description "Estonian-English translator for the command line."
   :url "https://github.com/eureton/et2en.git"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
