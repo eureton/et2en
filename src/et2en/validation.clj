@@ -1,5 +1,6 @@
 (ns et2en.validation
   (:gen-class)
+  (:require [clojure.string :as str])
   (:require [clojure.tools.cli :refer [parse-opts]])
   (:require [et2en.cli :as cli]))
 
@@ -43,6 +44,6 @@
     words
     (take 10)
     (map #(->> % (take 32) (apply str)))
-    (filter #(->> % (re-find non-alphabet) nil?))
+    (map #(str/replace % non-alphabet ""))
     distinct))
 
