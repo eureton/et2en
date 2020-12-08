@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. This change
 ## [Unreleased]
 ### Changed
 
+## [1.0.3] - 2020-12-08
+
+### Changed
+- strip irrelevant symbols from input, process remainder
+
 ## [1.0.2] - 2020-12-06
 
 ### Added
