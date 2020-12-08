@@ -35,4 +35,6 @@ All notable changes to this project will be documented in this file. This change
 
 ### Fixed
 
-[Unreleased]: https://github.com/eureton/et2en/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/eureton/et2en/compare/1.0.4...HEAD
+[1.0.4]: https://github.com/eureton/et2en/compare/1.0.2...1.0.4
+[1.0.2]: https://github.com/eureton/et2en/compare/0.1.0...1.0.2
