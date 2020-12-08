@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. This change
 ## [Unreleased]
 ### Changed
 
-## [1.0.3] - 2020-12-08
+## [1.0.4] - 2020-12-08
 
 ### Changed
 - strip irrelevant symbols from input, process remainder
