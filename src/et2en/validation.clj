@@ -45,5 +45,6 @@
     (take 32)
     (map #(->> % (take 32) (apply str)))
     (map #(str/replace % non-alphabet ""))
+    (remove str/blank?)
     distinct))
 
