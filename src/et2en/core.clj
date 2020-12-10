@@ -12,10 +12,11 @@
 
 (defn combine [coll xform]
   (let [from-chan (async/chan)
-        to-chan (async/chan)]
+        to-chan (async/chan)
+        parallelism (max (count coll) 1)]
     (->>
       (do
-        (async/pipeline-blocking (count coll) to-chan xform from-chan)
+        (async/pipeline-blocking parallelism to-chan xform from-chan)
         (async/onto-chan!! from-chan coll)
         (async/<!! (async/into [] to-chan)))
       (mapcat hash-map coll)
