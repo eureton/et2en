@@ -42,7 +42,7 @@
 (defn sanitize [words]
   (->>
     words
-    (take 10)
+    (take 32)
     (map #(->> % (take 32) (apply str)))
     (map #(str/replace % non-alphabet ""))
     distinct))
