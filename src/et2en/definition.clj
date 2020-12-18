@@ -7,7 +7,9 @@
   (str "https://glosbe.com/et/en/" word))
 
 (defn definition-html [url]
-  ((http/get url) :body))
+  (try
+    ((http/get url) :body)
+    (catch clojure.lang.ExceptionInfo _ "")))
 
 (defn scrape-definitions [html]
   (->>

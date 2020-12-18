@@ -51,11 +51,12 @@
 
 (def not-available (inflate-lemma "--" '("--") '("--") '("--")))
 
-(defn patch-missing [record]
-  (if
-    (empty? (record :lemmas))
-    (merge record {:lemmas (list not-available)})
-    record))
+(defn patch-missing [{:as record :keys [lemmas]}]
+  (let [if-empty #(if (empty? %1) %2 %1)]
+    (->
+      record
+      (assoc :lemmas (if (empty? lemmas) (list not-available) lemmas))
+      (assoc :lemmas (map #(merge-with if-empty % not-available) lemmas)))))
 
 (defn to-display-string [coll sep lim]
   (let [distinct-coll (distinct coll)]
