@@ -23,9 +23,11 @@ Clone this repo:
 
 ## Options
 
-`-v` / `--version` displays the program version
+`-v` / `--version` prints the program version
 
-`-h` / `--help` displays the help message
+`-l` / `--legend` prints a legend of all abbreviations
+
+`-h` / `--help` prints the help message
 
 ## Examples
 
