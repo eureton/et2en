@@ -24,6 +24,9 @@
   (let [{:keys [options arguments errors summary]} (parse-opts args cli/options)
         usage-summary (cli/usage summary)]
     (cond
+      (options :legend)
+      {:exit-message (cli/legend) :ok? true}
+
       (options :help)
       {:exit-message usage-summary :ok? true}
 

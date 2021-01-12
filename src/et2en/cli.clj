@@ -15,7 +15,8 @@
    (System/exit exit-code)))
 
 (def options
-  [["-v" "--version" "print the program version"]
+  [["-l" "--legend" "print the abbreviations legend"]
+   ["-v" "--version" "print the program version"]
    ["-h" "--help" "print this help message"]])
 
 (defn usage
@@ -26,6 +27,65 @@
      ""
      "Options:"
      options-summary]
+    (str/join \newline)))
+
+(defn legend
+  ""
+  []
+  (->>
+    [""
+     "Abbreviations of grammatical forms:"
+     ""
+     "Part of speech:"
+     "n: noun"
+     "adj: adjective"
+     "adv: adverb"
+     "v: verb"
+     ""
+     "Number:"
+     "sg: singular"
+     "pl: plural"
+     ""
+     "Person:"
+     "1st-p: first person"
+     "2nd-p: second person"
+     "3rd-p: third person"
+     ""
+     "Voice:"
+     "act: active"
+     "pass: passive"
+     ""
+     "Mode"
+     "imp: imperative"
+     "cond: conditional"
+     "oblq: oblique"
+     ""
+     "Tense:"
+     "pr: present"
+     "prf: past perfect"
+     "iprf: imperfect past"
+     ""
+     "Case:"
+     "n: nominative"
+     "g: genitive"
+     "p: partitive"
+     "ill: illative"
+     "in: inessive"
+     "el: elative"
+     "all: allative"
+     "ad: adessive"
+     "abl: ablative"
+     "tr: translative"
+     "ter: terminative"
+     "es: essive"
+     "ab: abessive"
+     "kom: comitative"
+     ""
+     "Verbals:"
+     "inf: infinitive"
+     "ger: gerund"
+     "pple: participle"
+     ]
     (str/join \newline)))
 
 (defn error-msg
