@@ -29,8 +29,11 @@
 (def re-verb
   (cat-re re-lemma #"_(V)_." re-verb-form #","))
 
+(def re-particle
+  (cat-re re-lemma #"_(J)_."))
+
 (defn extract-pos [x]
-  (case (x :pos) "S" "n" "A" "adj" "D" "adv" "V" "v"))
+  (case (x :pos) "S" "n" "A" "adj" "D" "adv" "V" "v" "J" "ptcl"))
 
 (defn extract-gram [x]
   (case (x :person-tense-mood)
@@ -103,14 +106,24 @@
     (map #(zipmap [:lemma :pos :person-tense-mood] %))
     (map inflate-verb)))
 
+(defn extract-particle [s]
+  (->>
+    (re-seq re-particle s)
+    (map rest)
+    (map #(zipmap [:lemma :pos] %))
+    (map #(hash-map :lemma (extract-lemma (% :lemma)) :pos (extract-pos %)))))
+
 (defn scrape-grammar [html]
   (->>
     (.select (Jsoup/parse html) "body table tr")
     (map #(.text %))
     first
-    (#(list (extract-noun-or-adjective %) (extract-adverb %) (extract-verb %)))
-    flatten
-    ))
+    ((juxt
+       extract-noun-or-adjective
+       extract-adverb
+       extract-verb
+       extract-particle))
+    flatten))
 
 (def words-to-grammar
   (comp

@@ -15,8 +15,8 @@
    (System/exit exit-code)))
 
 (def options
-  [["-l" "--legend" "print the abbreviations legend"]
-   ["-v" "--version" "print the program version"]
+  [["-l" "--legend" "print glossing abbreviations legend"]
+   ["-v" "--version" "print program version"]
    ["-h" "--help" "print this help message"]])
 
 (defn usage
@@ -34,13 +34,14 @@
   []
   (->>
     [""
-     "Abbreviations of grammatical forms:"
+     "Glossing abbreviations:"
      ""
      "Part of speech:"
      "n: noun"
      "adj: adjective"
      "adv: adverb"
      "v: verb"
+     "ptcl: particle"
      ""
      "Number:"
      "sg: singular"

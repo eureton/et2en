@@ -25,7 +25,7 @@ Clone this repo:
 
 `-v` / `--version` prints the program version
 
-`-l` / `--legend` prints a legend of all abbreviations
+`-l` / `--legend` prints a legend of glossing abbreviations
 
 `-h` / `--help` prints the help message
 
