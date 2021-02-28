@@ -12,4 +12,14 @@
   :main ^:skip-aot et2en.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}})
+                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]
+                       :native-image {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}}}
+  :native-image {:name "et2en"
+                 :graal-bin "/home/agis/tools/graalvm-ce-java8-21.0.0.2/bin"
+                 :opts ["--initialize-at-build-time"
+                        "--report-unsupported-elements-at-runtime"
+                        "--no-server"
+                        "--no-fallback"
+                        "--enable-https"
+                        "--enable-url-protocols=https"
+                        "-H:ReflectionConfigurationFiles=reflection-config.json"]})
