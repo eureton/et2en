@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. This change
 ## [Unreleased]
 ### Changed
 
+## [1.0.7] - 2021-03-13
+
+### Changed
+
+- update Glosbe scraper to the latest HTML
+- update `jsoup`
+- update `clj-http`
+- update `tools.cli`
+
 ## [1.0.6] - 2021-03-01
 
 ### Changed
@@ -57,7 +66,8 @@ All notable changes to this project will be documented in this file. This change
 
 ### Fixed
 
-[Unreleased]: https://github.com/eureton/et2en/compare/1.0.6...HEAD
+[Unreleased]: https://github.com/eureton/et2en/compare/1.0.7...HEAD
+[1.0.7]: https://github.com/eureton/et2en/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/eureton/et2en/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/eureton/et2en/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/eureton/et2en/compare/1.0.2...1.0.4
