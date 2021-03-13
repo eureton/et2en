@@ -13,7 +13,7 @@
 
 (defn scrape-definitions [html]
   (->>
-    (.select (Jsoup/parse html) "div.text-info strong.phr")
+    (.select (Jsoup/parse html) "h3.translation span[data-translation]")
     (map #(.text %))
     flatten))
 
