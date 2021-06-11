@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file. This change
 ## [Unreleased]
 ### Changed
 
+## [1.0.8] - 2021-06-12
+
+### Changed
+
+- native image:
+  - remove hardcoding of GraalVM installation dir
+  - depend on `GRAALVM_HOME` env variable
+  - migrate from `clj-http` to `clj-http-lite`
+
 ## [1.0.7] - 2021-03-13
 
 ### Changed
