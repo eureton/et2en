@@ -46,7 +46,7 @@
                      (let [relevant? #(= (% :lemma) t)
                            relevant-gs (filter relevant? (ws2gs w))]
                        (inflate-lookup
-                         (-> w ws2ls not-empty)
+                         (when (-> w ws2ls not-empty) t)
                          (ts2ds t)
                          (map :pos relevant-gs)
                          (map :gram relevant-gs))))

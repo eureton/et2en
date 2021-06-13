@@ -1,11 +1,10 @@
 (ns et2en.definition
   (:gen-class)
-  (:require [et2en.util :as util])
   (:require [clj-http.lite.client :as http])
   (:import (org.jsoup Jsoup)))
 
 (defn url [word]
-  (str "https://glosbe.com/et/en/" (util/encode-for-url word)))
+  (str "https://glosbe.com/et/en/" (java.net.URLEncoder/encode word)))
 
 (defn html [url]
   (try
