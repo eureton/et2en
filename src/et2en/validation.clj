@@ -12,7 +12,7 @@
     (catch java.net.UnknownHostException e false)
     (catch java.net.SocketException e false)))
 
-(def non-alphabet #"[^A-Za-zŠšŽžÕõÄäÖöÜü]")
+(def non-alphabet #"[^A-Za-zŠšŽžÕõÄäÖöÜü ]")
 
 (defn validate
   "Validates command-line arguments and returns a map:
@@ -47,6 +47,7 @@
     words
     (take 32)
     (map #(->> % (take 32) (apply str)))
+    (map #(str/replace % #"\s+" " "))
     (map #(str/replace % non-alphabet ""))
     (remove str/blank?)
     distinct))
