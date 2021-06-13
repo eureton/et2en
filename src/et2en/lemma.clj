@@ -5,7 +5,10 @@
   (:import (org.jsoup Jsoup)))
 
 (defn url [word]
-  (str "https://filosoft.ee/lemma_et/lemma.cgi?word=" word))
+  (->>
+    word
+    java.net.URLEncoder/encode
+    (str "https://filosoft.ee/lemma_et/lemma.cgi?word=")))
 
 (defn html [url]
   ((http/get url) :body))
