@@ -33,7 +33,7 @@
   (let [ws2ls (combine words lemma/words-to-lemmas)
         ws2gs (combine words grammar/words-to-grammar)
         ls (flatten (vals ws2ls))
-        ls2ds (combine ls definition/lemmas-to-definitions)]
+        ls2ds (combine ls definition/lookup)]
     (map
       (fn [w]
         {:word w
