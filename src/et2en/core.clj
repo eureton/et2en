@@ -23,8 +23,8 @@
       (map #(apply hash-map %))
       (reduce merge))))
 
-(defn inflate-lemma [lemma definition pos gram]
-  {:form lemma
+(defn inflate-lookup [term definition pos gram]
+  {:term term
    :definitions definition
    :pos pos
    :gram gram})
@@ -32,31 +32,35 @@
 (defn inflate-records [words]
   (let [ws2ls (combine words lemma/words-to-lemmas)
         ws2gs (combine words grammar/words-to-grammar)
-        ls (flatten (vals ws2ls))
-        ls2ds (combine ls definition/lookup)]
+        ws2ts (reduce-kv
+                (fn [acc k v] (assoc acc k (-> v not-empty (or [k]))))
+                {}
+                ws2ls)
+        ts (flatten (vals ws2ts))
+        ts2ds (combine ts definition/lookup)]
     (map
       (fn [w]
         {:word w
-         :lemmas (map
-                   (fn [l]
-                     (let [relevant? #(= (% :lemma) l)
+         :lookups (map
+                   (fn [t]
+                     (let [relevant? #(= (% :lemma) t)
                            relevant-gs (filter relevant? (ws2gs w))]
-                       (inflate-lemma
-                         l
-                         (ls2ds l)
+                       (inflate-lookup
+                         (-> w ws2ls not-empty)
+                         (ts2ds t)
                          (map :pos relevant-gs)
                          (map :gram relevant-gs))))
-                   (ws2ls w))})
+                   (ws2ts w))})
       words)))
 
-(def not-available (inflate-lemma "--" '("--") '("--") '("--")))
+(def not-available (inflate-lookup "--" '("--") '("--") '("--")))
 
-(defn patch-missing [{:as record :keys [lemmas]}]
+(defn patch-missing [{:as record :keys [lookups]}]
   (let [if-empty #(if (empty? %1) %2 %1)]
     (->
       record
-      (assoc :lemmas (if (empty? lemmas) (list not-available) lemmas))
-      (assoc :lemmas (map #(merge-with if-empty % not-available) lemmas)))))
+      (assoc :lookups (if (empty? lookups) (list not-available) lookups))
+      (assoc :lookups (map #(merge-with if-empty % not-available) lookups)))))
 
 (defn to-display-string [coll sep lim]
   (let [distinct-coll (distinct coll)]
@@ -69,13 +73,13 @@
     (map
       (fn [record]
         (map
-          (fn [lemma]
+          (fn [lookup]
             {:word (record :word)
-             :pos (to-display-string (lemma :pos) ", " 8)
-             :lemma (lemma :form)
-             :gram (to-display-string (lemma :gram) ", " 16)
-             :definition (to-display-string (lemma :definitions) ", " 64)})
-          (record :lemmas)))
+             :pos (to-display-string (lookup :pos) ", " 8)
+             :lemma (lookup :term)
+             :gram (to-display-string (lookup :gram) ", " 16)
+             :definition (to-display-string (lookup :definitions) ", " 64)})
+          (record :lookups)))
       records)))
 
 (defn deduplicate
