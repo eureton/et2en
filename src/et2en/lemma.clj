@@ -4,13 +4,13 @@
   (:require [clj-http.lite.client :as http])
   (:import (org.jsoup Jsoup)))
 
-(defn lemmas-url [word]
+(defn url [word]
   (str "https://filosoft.ee/lemma_et/lemma.cgi?word=" word))
 
-(defn lemmas-html [url]
+(defn html [url]
   ((http/get url) :body))
 
-(defn scrape-lemmas [html]
+(defn scrape [html]
   (let [re-match (->>
                    (.select (Jsoup/parse html) "body")
                    (map #(.text %))
@@ -22,9 +22,9 @@
       str/blank?
       (-> re-match (or "") str/trim (str/split #"\s")))))
 
-(def words-to-lemmas
+(def lookup
   (comp
-    (map lemmas-url)
-    (map lemmas-html)
-    (map scrape-lemmas)))
+    (map url)
+    (map html)
+    (map scrape)))
 

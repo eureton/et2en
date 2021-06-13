@@ -30,7 +30,7 @@
    :gram gram})
 
 (defn inflate-records [words]
-  (let [ws2ls (combine words lemma/words-to-lemmas)
+  (let [ws2ls (combine words lemma/lookup)
         ws2gs (combine words grammar/words-to-grammar)
         ws2ts (reduce-kv
                 (fn [acc k v] (assoc acc k (-> v not-empty (or [k]))))
