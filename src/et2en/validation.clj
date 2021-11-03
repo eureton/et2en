@@ -7,7 +7,7 @@
 (defn connected? []
   (try
     (do
-      (clj-http.client/head "https://google.com")
+      (clj-http.lite.client/head "https://google.com")
       true)
     (catch java.net.UnknownHostException e false)
     (catch java.net.SocketException e false)))

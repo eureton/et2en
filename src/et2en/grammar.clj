@@ -1,7 +1,7 @@
 (ns et2en.grammar
   (:gen-class)
   (:require [clojure.string :as str])
-  (:require [clj-http.client :as client])
+  (:require [clj-http.lite.client :as client])
   (:import (org.jsoup Jsoup)))
 
 (defn grammar-html [word]

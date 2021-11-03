@@ -1,7 +1,7 @@
 (ns et2en.lemma
   (:gen-class)
   (:require [clojure.string :as str])
-  (:require [clj-http.client :as http])
+  (:require [clj-http.lite.client :as http])
   (:import (org.jsoup Jsoup)))
 
 (defn lemmas-url [word]
